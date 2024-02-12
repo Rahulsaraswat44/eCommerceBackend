@@ -1,2 +1,2 @@
 # eCommerceBackend
-eCommerce backend created with Java Spring boot and deployed with Docker and Kubernetes on a cloud environment.
+eCommerce backend created with Java Spring boot and deployed with Docker and Kubernetes on a cloud environment. It will use a microservice architecture where services will be created in Spring boot and Communication I would be dependent upon Rest Apis. Later, I would also like to create certain services in Golang as well and also utilize gRPC for service to service communication in these microservices. 
