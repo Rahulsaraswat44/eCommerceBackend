@@ -18,6 +18,7 @@ spring:
   application:
     name: ORDER-SERVICE
 
+
 eureka:
   instance:
     prefer-ip-address: true
