@@ -18,6 +18,10 @@ spring:
   application:
     name: PRODUCT-SERVICE
 
+  cloud:
+    config:
+      enabled: false
+
 eureka:
   instance:
     prefer-ip-address: true
