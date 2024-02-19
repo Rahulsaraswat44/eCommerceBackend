@@ -18,6 +18,9 @@ spring:
   application:
     name: ORDER-SERVICE
 
+  cloud:
+    config:
+      enabled: false
 
 eureka:
   instance:
