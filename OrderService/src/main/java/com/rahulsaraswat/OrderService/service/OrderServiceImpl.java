@@ -1,7 +1,9 @@
 package com.rahulsaraswat.OrderService.service;
 
 import com.rahulsaraswat.OrderService.entity.Order;
+import com.rahulsaraswat.OrderService.external.client.PaymentService;
 import com.rahulsaraswat.OrderService.external.client.ProductService;
+import com.rahulsaraswat.OrderService.external.request.PaymentRequest;
 import com.rahulsaraswat.OrderService.model.OrderRequest;
 import com.rahulsaraswat.OrderService.repository.OrderRepository;
 import lombok.extern.log4j.Log4j2;
@@ -15,10 +17,13 @@ import java.time.Instant;
 public class OrderServiceImpl implements OrderService{
 
     @Autowired
-    OrderRepository orderRepository;
+    private OrderRepository orderRepository;
 
     @Autowired
-    ProductService productService;
+    private ProductService productService;
+
+    @Autowired
+    private PaymentService paymentService;
     @Override
     public Long placeOrder(OrderRequest orderRequest) {
         // find if the product exists with the product ID
@@ -37,8 +42,27 @@ public class OrderServiceImpl implements OrderService{
                 .build();
 
         orderRepository.save(order);
-        log.info("order created successfully...");
+        log.info("calling payment service to make the payment");
 
+        PaymentRequest paymentRequest = PaymentRequest.builder()
+                .orderId(order.getId())
+                .paymentMode(orderRequest.getPaymentMethod().name())
+                .amount((int)orderRequest.getPrice())
+                .build();
+
+        String orderStatus = null;
+
+        try {
+            paymentService.doPayment(paymentRequest);
+            log.info("payment done successfully");
+            orderStatus = "PLACED";
+        } catch (Exception e) {
+            log.info("Could not make the payment");
+            orderStatus = "PAYMENT_FAILED";
+        }
+
+        order.setStatus(orderStatus);
+        orderRepository.save(order);
         return order.getId();
     }
 }
