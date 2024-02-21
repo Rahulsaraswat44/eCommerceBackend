@@ -1,4 +1,4 @@
-package com.rahulsaraswat.ProductService.model;
+package com.rahulsaraswat.OrderService.external.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
