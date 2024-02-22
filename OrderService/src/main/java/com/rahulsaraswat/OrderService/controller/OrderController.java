@@ -1,6 +1,7 @@
 package com.rahulsaraswat.OrderService.controller;
 
 import com.rahulsaraswat.OrderService.model.OrderRequest;
+import com.rahulsaraswat.OrderService.model.OrderResponse;
 import com.rahulsaraswat.OrderService.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,5 +19,11 @@ public class OrderController {
     ResponseEntity<Long> placeOrder(@RequestBody OrderRequest orderRequest) {
             Long orderId = orderService.placeOrder(orderRequest);
             return new ResponseEntity<>(orderId, HttpStatus.OK);
+    }
+
+    @GetMapping("/{orderId}")
+    ResponseEntity<OrderResponse> getOrder(@PathVariable long orderId) {
+        OrderResponse orderResponse = orderService.getOrder(orderId);
+        return new ResponseEntity<>(orderResponse, HttpStatus.OK);
     }
 }

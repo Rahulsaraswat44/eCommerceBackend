@@ -1,12 +1,17 @@
 package com.rahulsaraswat.OrderService.service;
 
 import com.rahulsaraswat.OrderService.entity.Order;
+import com.rahulsaraswat.OrderService.exception.CustomOrderException;
 import com.rahulsaraswat.OrderService.external.client.PaymentService;
 import com.rahulsaraswat.OrderService.external.client.ProductService;
 import com.rahulsaraswat.OrderService.external.request.PaymentRequest;
+import com.rahulsaraswat.OrderService.external.response.PaymentResponse;
+import com.rahulsaraswat.OrderService.external.response.ProductResponse;
 import com.rahulsaraswat.OrderService.model.OrderRequest;
+import com.rahulsaraswat.OrderService.model.OrderResponse;
 import com.rahulsaraswat.OrderService.repository.OrderRepository;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -64,5 +69,45 @@ public class OrderServiceImpl implements OrderService{
         order.setStatus(orderStatus);
         orderRepository.save(order);
         return order.getId();
+    }
+
+    @Override
+    public OrderResponse getOrder(long orderId) {
+        log.info("Getting details for orderId: {}", orderId);
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new CustomOrderException("Order  Not found for orderId:" + orderId,
+                        "NOT_FOUND", 404));
+
+        ProductResponse productResponse = productService.getProductById(order.getProductId()).getBody();
+
+        OrderResponse.ProductDetails productDetails = OrderResponse.ProductDetails.builder()
+                .productName(productResponse.getProductName())
+                .productID(productResponse.getProductID())
+                .price(productResponse.getPrice())
+                .quantity(productResponse.getQuantity())
+                .build();
+
+        PaymentResponse paymentResponse = paymentService.getPaymentDetails(orderId).getBody();
+        OrderResponse.PaymentDetails paymentDetails = OrderResponse.PaymentDetails.builder()
+                .id(paymentResponse.getId())
+                .paymentStatus(paymentResponse.getPaymentStatus())
+                .referenceNumber(paymentResponse.getReferenceNumber())
+                .paymentDate(paymentResponse.getPaymentDate())
+                .amount(paymentResponse.getAmount())
+                .orderId(paymentResponse.getOrderId())
+                .paymentMode(paymentResponse.getPaymentMode())
+                .build();
+
+        OrderResponse orderResponse = OrderResponse.builder()
+                .orderId(order.getId())
+                .amount(order.getPrice())
+                .orderDate(order.getOrderDate())
+                .orderStatus(order.getStatus())
+                .productDetails(productDetails)
+                .paymentDetails(paymentDetails)
+                .build();
+
+        return orderResponse;
     }
 }
